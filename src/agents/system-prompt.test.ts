@@ -252,6 +252,19 @@ describe("buildAgentSystemPrompt", () => {
     expect(prompt).toContain("sessions_send");
   });
 
+  it("can suppress fallback tooling guidance when no tools are available", () => {
+    const prompt = buildAgentSystemPrompt({
+      workspaceDir: "/tmp/openclaw",
+      toolNames: [],
+      showDefaultToolingWhenEmpty: false,
+    });
+
+    expect(prompt).toContain(
+      "No OpenClaw tools are enabled in this runtime. Do not call OpenClaw API tools unless explicitly listed.",
+    );
+    expect(prompt).not.toContain("Pi lists the standard tools above. This runtime enables:");
+  });
+
   it("documents ACP sessions_spawn agent targeting requirements", () => {
     const prompt = buildAgentSystemPrompt({
       workspaceDir: "/tmp/openclaw",

@@ -44,6 +44,9 @@ describe("runCliAgent spawn path", () => {
     const input = supervisorSpawnMock.mock.calls[0]?.[0] as { argv?: string[] };
     const allArgs = (input.argv ?? []).join("\n");
     expect(allArgs).not.toContain("Tools are disabled in this session");
+    expect(allArgs).toContain(
+      "No OpenClaw tools are enabled in this runtime. Do not call OpenClaw API tools unless explicitly listed.",
+    );
     expect(allArgs).toContain("You are a helpful assistant.");
   });
 

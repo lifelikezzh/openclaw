@@ -73,6 +73,7 @@ export function buildSystemPrompt(params: {
     heartbeatPrompt: params.heartbeatPrompt,
     docsPath: params.docsPath,
     acpEnabled: params.config?.acp?.enabled !== false,
+    showDefaultToolingWhenEmpty: false,
     runtimeInfo,
     toolNames: params.tools.map((tool) => tool.name),
     modelAliasLines: buildModelAliasLines(params.config),
