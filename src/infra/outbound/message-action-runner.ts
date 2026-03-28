@@ -15,10 +15,7 @@ import type {
 } from "../../channels/plugins/types.js";
 import type { OpenClawConfig } from "../../config/config.js";
 import { hasInteractiveReplyBlocks, hasReplyPayloadContent } from "../../interactive/payload.js";
-import {
-  getAgentScopedMediaLocalRoots,
-  getAgentScopedMediaLocalRootsForSources,
-} from "../../media/local-roots.js";
+import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
 import { hasPollCreationParams } from "../../poll-params.js";
 import { resolvePollMaxSelections } from "../../polls.js";
 import { buildChannelAccountBindings } from "../../routing/bindings.js";
@@ -139,17 +136,6 @@ export function getToolResult(
   result: MessageActionRunResult,
 ): AgentToolResult<unknown> | undefined {
   return "toolResult" in result ? result.toolResult : undefined;
-}
-
-function collectActionMediaSourceHints(params: Record<string, unknown>): string[] {
-  const sources: string[] = [];
-  for (const key of ["media", "mediaUrl", "path", "filePath", "fileUrl"] as const) {
-    const value = params[key];
-    if (typeof value === "string" && value.trim()) {
-      sources.push(value);
-    }
-  }
-  return sources;
 }
 
 function applyCrossContextMessageDecoration({
@@ -744,11 +730,7 @@ export async function runMessageAction(
     mediaPolicy: normalizationPolicy,
   });
 
-  const mediaLocalRoots = getAgentScopedMediaLocalRootsForSources({
-    cfg,
-    agentId: resolvedAgentId,
-    mediaSources: collectActionMediaSourceHints(params),
-  });
+  const mediaLocalRoots = getAgentScopedMediaLocalRoots(cfg, resolvedAgentId);
   const mediaPolicy = resolveAttachmentMediaPolicy({
     sandboxRoot: input.sandboxRoot,
     mediaLocalRoots,

@@ -201,7 +201,7 @@ describe("runMessageAction media behavior", () => {
 
     async function expectRejectsLocalAbsolutePathWithoutSandbox(params: {
       cfg?: OpenClawConfig;
-      action: "sendAttachment" | "setGroupIcon";
+      action: "sendAttachment" | "setGroupIcon" | "upload-file";
       target: string;
       mediaField?: "media" | "mediaUrl" | "fileUrl";
       message?: string;
@@ -377,6 +377,12 @@ describe("runMessageAction media behavior", () => {
           action: "setGroupIcon" as const,
           target: "group:123",
           tempPrefix: "msg-group-icon-",
+        },
+        {
+          action: "upload-file" as const,
+          target: "+15551234567",
+          message: "caption",
+          tempPrefix: "msg-upload-file-",
         },
       ]) {
         await expectRejectsLocalAbsolutePathWithoutSandbox({
