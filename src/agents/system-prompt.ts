@@ -198,8 +198,6 @@ export function buildAgentSystemPrompt(params: {
   promptMode?: PromptMode;
   /** Whether ACP-specific routing guidance should be included. Defaults to true. */
   acpEnabled?: boolean;
-  /** Whether to print the built-in fallback tool list when no tools are available. Defaults to true. */
-  showDefaultToolingWhenEmpty?: boolean;
   runtimeInfo?: {
     agentId?: string;
     host?: string;
@@ -223,7 +221,6 @@ export function buildAgentSystemPrompt(params: {
   memoryCitationsMode?: MemoryCitationsMode;
 }) {
   const acpEnabled = params.acpEnabled !== false;
-  const showDefaultToolingWhenEmpty = params.showDefaultToolingWhenEmpty !== false;
   const sandboxedRuntime = params.sandboxInfo?.enabled === true;
   const acpSpawnRuntimeEnabled = acpEnabled && !sandboxedRuntime;
   const coreToolSummaries: Record<string, string> = {
@@ -415,26 +412,24 @@ export function buildAgentSystemPrompt(params: {
     "Tool names are case-sensitive. Call tools exactly as listed.",
     toolLines.length > 0
       ? toolLines.join("\n")
-      : showDefaultToolingWhenEmpty
-        ? [
-            "Pi lists the standard tools above. This runtime enables:",
-            "- grep: search file contents for patterns",
-            "- find: find files by glob pattern",
-            "- ls: list directory contents",
-            "- apply_patch: apply multi-file patches",
-            `- ${execToolName}: run shell commands (supports background via yieldMs/background)`,
-            `- ${processToolName}: manage background exec sessions`,
-            "- browser: control OpenClaw's dedicated browser",
-            "- canvas: present/eval/snapshot the Canvas",
-            "- nodes: list/describe/notify/camera/screen on paired nodes",
-            "- cron: manage cron jobs and wake events (use for reminders; when scheduling a reminder, write the systemEvent text as something that will read like a reminder when it fires, and mention that it is a reminder depending on the time gap between setting and firing; include recent context in reminder text if appropriate)",
-            "- sessions_list: list sessions",
-            "- sessions_history: fetch session history",
-            "- sessions_send: send to another session",
-            "- subagents: list/steer/kill sub-agent runs",
-            '- session_status: show usage/time/model state and answer "what model are we using?"',
-          ].join("\n")
-        : "No OpenClaw tools are enabled in this runtime. Do not call OpenClaw API tools unless explicitly listed.",
+      : [
+          "Pi lists the standard tools above. This runtime enables:",
+          "- grep: search file contents for patterns",
+          "- find: find files by glob pattern",
+          "- ls: list directory contents",
+          "- apply_patch: apply multi-file patches",
+          `- ${execToolName}: run shell commands (supports background via yieldMs/background)`,
+          `- ${processToolName}: manage background exec sessions`,
+          "- browser: control OpenClaw's dedicated browser",
+          "- canvas: present/eval/snapshot the Canvas",
+          "- nodes: list/describe/notify/camera/screen on paired nodes",
+          "- cron: manage cron jobs and wake events (use for reminders; when scheduling a reminder, write the systemEvent text as something that will read like a reminder when it fires, and mention that it is a reminder depending on the time gap between setting and firing; include recent context in reminder text if appropriate)",
+          "- sessions_list: list sessions",
+          "- sessions_history: fetch session history",
+          "- sessions_send: send to another session",
+          "- subagents: list/steer/kill sub-agent runs",
+          '- session_status: show usage/time/model state and answer "what model are we using?"',
+        ].join("\n"),
     "TOOLS.md does not control tool availability; it is user guidance for how to use external tools.",
     `For long waits, avoid rapid poll loops: use ${execToolName} with enough yieldMs or ${processToolName}(action=poll, timeout=<ms>).`,
     "If a task is more complex or takes longer, spawn a sub-agent. Completion is push-based: it will auto-announce when done.",
