@@ -1,5 +1,4 @@
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   appendLocalMediaParentRoots,
@@ -101,38 +100,26 @@ describe("local media roots", () => {
     });
   });
 
-  it("adds concrete parent roots for local media sources without widening to filesystem root", () => {
-    const picturesDir =
-      process.platform === "win32" ? "C:\\Users\\peter\\Pictures" : "/Users/peter/Pictures";
-    const moviesDir =
-      process.platform === "win32" ? "C:\\Users\\peter\\Movies" : "/Users/peter/Movies";
-
+  it("keeps configured roots unchanged for caller-provided media paths", () => {
     const roots = appendLocalMediaParentRoots(
       ["/tmp/base"],
       [
-        path.join(picturesDir, "photo.png"),
-        pathToFileURL(path.join(moviesDir, "clip.mp4")).href,
+        "/Users/peter/Pictures/photo.png",
+        "file:///Users/peter/Movies/clip.mp4",
         "https://example.com/remote.png",
-        "/top-level-file.png",
+        "/etc/passwd",
       ],
     );
 
-    expect(roots.map(normalizeHostPath)).toEqual(
-      expect.arrayContaining([
-        normalizeHostPath("/tmp/base"),
-        normalizeHostPath(picturesDir),
-        normalizeHostPath(moviesDir),
-      ]),
-    );
-    expect(roots.map(normalizeHostPath)).not.toContain(normalizeHostPath("/"));
+    expect(roots.map(normalizeHostPath)).toEqual([normalizeHostPath("/tmp/base")]);
   });
 
   it.each([
     {
-      name: "widens agent media roots for concrete local sources when workspaceOnly is disabled",
+      name: "does not widen agent media roots for concrete local sources when workspaceOnly is disabled",
       stateDir: path.join("/tmp", "openclaw-flexible-media-roots-state"),
       cfg: {},
-      shouldContainPictures: true,
+      shouldContainPictures: false,
     },
     {
       name: "does not widen agent media roots when workspaceOnly is enabled",
@@ -147,7 +134,7 @@ describe("local media roots", () => {
       shouldContainPictures: false,
     },
     {
-      name: "widens media roots again when messaging-profile agents explicitly enable filesystem tools",
+      name: "does not widen media roots for messaging-profile agents with filesystem tools enabled",
       stateDir: path.join("/tmp", "openclaw-messaging-fs-media-roots-state"),
       cfg: {
         tools: {
@@ -155,7 +142,7 @@ describe("local media roots", () => {
           fs: { workspaceOnly: false },
         },
       },
-      shouldContainPictures: true,
+      shouldContainPictures: false,
     },
   ] as const)("$name", ({ stateDir, cfg, shouldContainPictures }) => {
     const roots = withStateDir(stateDir, () =>
